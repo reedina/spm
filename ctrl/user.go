@@ -29,7 +29,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Does Team Resource Exist ?
-	if model.DoesTeamIDExist(user.TeamID) != true {
+	if model.DoesTeamIDExist(user.Team.ID) != true {
 		respondWithError(w, http.StatusBadRequest, "Team ID does not exist")
 		return
 	}
@@ -39,6 +39,12 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
+
+	// Get Team name for Team id
+	team := model.Team{}
+	team.ID = user.Team.ID
+	model.GetTeam(&team)
+	user.Team.Name = team.Name
 
 	respondWithJSON(w, http.StatusCreated, user)
 }
@@ -123,15 +129,31 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	user.ID = id
 
 	// Does Team Resource Exist ?
-	if model.DoesTeamIDExist(user.TeamID) != true {
+	if model.DoesTeamIDExist(user.Team.ID) != true {
 		respondWithError(w, http.StatusBadRequest, "Team ID does not exist")
 		return
 	}
+	// Does User ID exist ?
+	if model.DoesUserIDExist(user.ID) != true {
+		respondWithError(w, http.StatusBadRequest, "User ID does not exist")
+		return
+	}
 
+	// Does Email exists for another User ID
+	if model.DoesUserEmailExistForAnotherID(user.Email, user.ID) == true {
+		respondWithError(w, http.StatusBadRequest, "Email Exists for another User ID")
+		return
+	}
 	if err := model.UpdateUser(&user); err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
+
+	// Get Team name for Team id
+	team := model.Team{}
+	team.ID = user.Team.ID
+	model.GetTeam(&team)
+	user.Team.Name = team.Name
 
 	respondWithJSON(w, http.StatusOK, user)
 }

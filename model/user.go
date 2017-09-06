@@ -10,7 +10,7 @@ type User struct {
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
 	Email     string `json:"email"`
-	TeamID    int    `json:"team_id"`
+	Team      Team   `json:"team"`
 }
 
 //Users (TYPE)
@@ -44,12 +44,29 @@ func DoesUserIDExist(ID int) bool {
 	return true
 }
 
+//DoesUserEmailExistForAnotherID (PUT)
+func DoesUserEmailExistForAnotherID(email string, id int) bool {
+
+	var dbID int
+	err := db.QueryRow("SELECT id FROM spm_users WHERE email=$1", email).Scan(&dbID)
+
+	if err == sql.ErrNoRows {
+		return false
+	}
+
+	if dbID != id {
+		return true
+	}
+
+	return false
+}
+
 //CreateUser (POST)
 func CreateUser(user *User) error {
 
 	err := db.QueryRow(
 		"INSERT INTO spm_users(first_name, last_name, email, team_id) VALUES($1, $2, $3, $4) RETURNING id",
-		user.FirstName, user.LastName, user.Email, user.TeamID).Scan(&user.ID)
+		user.FirstName, user.LastName, user.Email, user.Team.ID).Scan(&user.ID)
 
 	if err != nil {
 		return err
@@ -60,7 +77,8 @@ func CreateUser(user *User) error {
 
 //GetUsers (GET)
 func GetUsers() ([]User, error) {
-	rows, err := db.Query("SELECT id, first_name, last_name, email, team_id FROM spm_users")
+	rows, err := db.Query("SELECT spm_users.id, first_name, last_name, email, team_id, name FROM spm_users " +
+		"inner join spm_teams on spm_teams.id = team_id")
 
 	if err != nil {
 		return nil, err
@@ -72,7 +90,7 @@ func GetUsers() ([]User, error) {
 		defer rows.Close()
 
 		var u User
-		if err := rows.Scan(&u.ID, &u.FirstName, &u.LastName, &u.Email, &u.TeamID); err != nil {
+		if err := rows.Scan(&u.ID, &u.FirstName, &u.LastName, &u.Email, &u.Team.ID, &u.Team.Name); err != nil {
 			return nil, err
 		}
 		users = append(users, u)
@@ -83,21 +101,23 @@ func GetUsers() ([]User, error) {
 
 //GetUser (GET)
 func GetUser(user *User) error {
-	return db.QueryRow("SELECT first_name, last_name, email, team_id FROM spm_users WHERE id=$1",
-		user.ID).Scan(&user.FirstName, &user.LastName, &user.Email, &user.TeamID)
+	return db.QueryRow("SELECT first_name, last_name, email, team_id, name FROM spm_users "+
+		"inner join spm_teams on spm_teams.id = team_id WHERE spm_users.id=$1",
+		user.ID).Scan(&user.FirstName, &user.LastName, &user.Email, &user.Team.ID, &user.Team.Name)
 }
 
 //GetUserByEmail (GET)
 func GetUserByEmail(user *User) error {
-	return db.QueryRow("SELECT id, first_name, last_name, team_id FROM spm_users WHERE email=$1",
-		user.Email).Scan(&user.ID, &user.FirstName, &user.LastName, &user.TeamID)
+	return db.QueryRow("SELECT spm_users.id, first_name, last_name, team_id, name FROM spm_users "+
+		"inner join spm_teams on spm_teams.id = team_id WHERE email=$1",
+		user.Email).Scan(&user.ID, &user.FirstName, &user.LastName, &user.Team.ID, &user.Team.Name)
 }
 
 //UpdateUser (PUT)
 func UpdateUser(user *User) error {
 	_, err :=
-		db.Exec("UPDATE spm_users SET first_name=$1, last_name=$2, email=$3 , team_id=$4 WHERE id=$5",
-			user.FirstName, user.LastName, user.Email, user.TeamID, user.ID)
+		db.Exec("UPDATE spm_users SET first_name=$1, last_name=$2, email=$3, team_id=$4 WHERE id=$5",
+			user.FirstName, user.LastName, user.Email, user.Team.ID, user.ID)
 
 	return err
 }
