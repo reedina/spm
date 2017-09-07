@@ -71,6 +71,27 @@ func GetTeam(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, team)
 }
 
+//GetTeamByName (GET)
+func GetTeamByName(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	teamName := vars["name"]
+
+	team := model.Team{}
+	team.Name = teamName
+
+	if err := model.GetTeamByName(&team); err != nil {
+		switch err {
+		case sql.ErrNoRows:
+			respondWithError(w, http.StatusNotFound, "Team not found")
+		default:
+			respondWithError(w, http.StatusInternalServerError, err.Error())
+		}
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, team)
+}
+
 //UpdateTeam (PUT)
 func UpdateTeam(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)

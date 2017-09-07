@@ -95,6 +95,12 @@ func GetTeam(team *Team) error {
 	return db.QueryRow("SELECT name FROM spm_teams WHERE id=$1", team.ID).Scan(&team.Name)
 }
 
+//GetTeamByName (GET)
+func GetTeamByName(team *Team) error {
+	return db.QueryRow("SELECT id, name from spm_teams where name=$1",
+		team.Name).Scan(&team.ID, &team.Name)
+}
+
 //UpdateTeam (PUT)
 func UpdateTeam(team *Team) error {
 	_, err :=

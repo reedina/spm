@@ -32,6 +32,7 @@ func (a *App) InitializeRoutes() {
 	a.Router.HandleFunc("/api/team", ctrl.CreateTeam).Methods("POST")
 	a.Router.HandleFunc("/api/teams", ctrl.GetTeams).Methods("GET")
 	a.Router.HandleFunc("/api/team/{id:[0-9]+}", ctrl.GetTeam).Methods("GET")
+	a.Router.HandleFunc("/api/team/{name}", ctrl.GetTeamByName).Methods("GET")
 	a.Router.HandleFunc("/api/team/{id:[0-9]+}", ctrl.UpdateTeam).Methods("PUT")
 	a.Router.HandleFunc("/api/team/{id:[0-9]+}", ctrl.DeleteTeam).Methods("DELETE")
 
