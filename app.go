@@ -43,6 +43,13 @@ func (a *App) InitializeRoutes() {
 	a.Router.HandleFunc("/api/user/{id:[0-9]+}", ctrl.UpdateUser).Methods("PUT")
 	a.Router.HandleFunc("/api/user/{id:[0-9]+}", ctrl.DeleteUser).Methods("DELETE")
 
+	//model.Project struct
+	a.Router.HandleFunc("/api/project", ctrl.CreateProject).Methods("POST")
+	a.Router.HandleFunc("/api/projects", ctrl.GetProjects).Methods("GET")
+	a.Router.HandleFunc("/api/project/{id:[0-9]+}", ctrl.GetProject).Methods("GET")
+	a.Router.HandleFunc("/api/project/{name}", ctrl.GetProjectByName).Methods("GET")
+	a.Router.HandleFunc("/api/project/{id:[0-9]+}", ctrl.UpdateProject).Methods("PUT")
+	a.Router.HandleFunc("/api/project/{id:[0-9]+}", ctrl.DeleteProject).Methods("DELETE")
 }
 
 //RunApplication - Start the HTTP server

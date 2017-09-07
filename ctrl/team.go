@@ -90,6 +90,16 @@ func UpdateTeam(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	team.ID = id
 
+	// Does Team Resource Exist ?
+	if model.DoesTeamIDExist(team.ID) != true {
+		respondWithError(w, http.StatusBadRequest, "Team ID does not exist")
+		return
+	}
+	// Does Team Name exists for another ID
+	if model.DoesTeamNameExistForAnotherID(team.Name, team.ID) == true {
+		respondWithError(w, http.StatusBadRequest, "Team Name Exists for another Team ID")
+		return
+	}
 	if err := model.UpdateTeam(&team); err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
@@ -112,6 +122,4 @@ func DeleteTeam(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-
-	respondWithJSON(w, http.StatusOK, map[string]string{"result": "success"})
 }

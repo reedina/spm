@@ -38,6 +38,23 @@ func DoesTeamIDExist(ID int) bool {
 	return true
 }
 
+//DoesTeamNameExistForAnotherID (PUT)
+func DoesTeamNameExistForAnotherID(name string, id int) bool {
+
+	var dbID int
+	err := db.QueryRow("SELECT id FROM spm_teams WHERE name=$1", name).Scan(&dbID)
+
+	if err == sql.ErrNoRows {
+		return false
+	}
+
+	if dbID != id {
+		return true
+	}
+
+	return false
+}
+
 //CreateTeam (POST)
 func CreateTeam(team *Team) error {
 

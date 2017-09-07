@@ -22,7 +22,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	//Does the Account Attribute Resource Exist ?
+	//Does the User Resource Exist ?
 	if model.DoesUserResourceExist(&user) == true {
 		respondWithError(w, http.StatusConflict, "Resource already exists")
 		return
@@ -133,6 +133,7 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusBadRequest, "Team ID does not exist")
 		return
 	}
+
 	// Does User ID exist ?
 	if model.DoesUserIDExist(user.ID) != true {
 		respondWithError(w, http.StatusBadRequest, "User ID does not exist")
@@ -144,6 +145,7 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusBadRequest, "Email Exists for another User ID")
 		return
 	}
+
 	if err := model.UpdateUser(&user); err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
