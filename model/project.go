@@ -108,7 +108,7 @@ func GetProject(project *Project) error {
 func GetProjectByName(project *Project) error {
 	return db.QueryRow("SELECT spm_projects.id, spm_teams.id, spm_teams.name FROM spm_projects "+
 		"inner join spm_teams on spm_teams.id = team_id WHERE spm_projects.name=$1",
-		project.Name).Scan(&project.ID, &project.Team.ID, &project.Name)
+		project.Name).Scan(&project.ID, &project.Team.ID, &project.Team.Name)
 }
 
 //UpdateProject (PUT)
