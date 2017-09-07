@@ -111,6 +111,56 @@ func GetProjectByName(project *Project) error {
 		project.Name).Scan(&project.ID, &project.Team.ID, &project.Team.Name)
 }
 
+//GetProjectsByTeamName (GET)
+func GetProjectsByTeamName(project *Project) ([]Project, error) {
+	rows, err := db.Query("SELECT spm_projects.id, spm_projects.name, spm_teams.id, spm_teams.name FROM spm_projects "+
+		"inner join spm_teams on spm_teams.id = team_id WHERE spm_teams.name=$1",
+		project.Team.Name)
+
+	if err != nil {
+		return nil, err
+	}
+
+	projects := []Project{}
+
+	for rows.Next() {
+		defer rows.Close()
+
+		var p Project
+		if err := rows.Scan(&p.ID, &p.Name, &p.Team.ID, &p.Team.Name); err != nil {
+			return nil, err
+		}
+		projects = append(projects, p)
+	}
+
+	return projects, nil
+}
+
+//GetProjectsByTeamID (GET)
+func GetProjectsByTeamID(project *Project) ([]Project, error) {
+	rows, err := db.Query("SELECT spm_projects.id, spm_projects.name, spm_teams.id, spm_teams.name FROM spm_projects "+
+		"inner join spm_teams on spm_teams.id = team_id WHERE spm_teams.id=$1",
+		project.Team.ID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	projects := []Project{}
+
+	for rows.Next() {
+		defer rows.Close()
+
+		var p Project
+		if err := rows.Scan(&p.ID, &p.Name, &p.Team.ID, &p.Team.Name); err != nil {
+			return nil, err
+		}
+		projects = append(projects, p)
+	}
+
+	return projects, nil
+}
+
 //UpdateProject (PUT)
 func UpdateProject(project *Project) error {
 	_, err :=

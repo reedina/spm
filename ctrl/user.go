@@ -109,6 +109,57 @@ func GetUserByEmail(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, user)
 }
 
+//GetUsersByTeamName (GET)
+func GetUsersByTeamName(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	userTeamName := vars["name"]
+
+	user := model.User{}
+	user.Team.Name = userTeamName
+
+	users, err := model.GetUsersByTeamName(&user)
+
+	if err != nil {
+		switch err {
+		case sql.ErrNoRows:
+			respondWithError(w, http.StatusNotFound, "Team Name not found")
+		default:
+			respondWithError(w, http.StatusInternalServerError, err.Error())
+		}
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, users)
+}
+
+//GetUsersByTeamID (GET)
+func GetUsersByTeamID(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "Invalid User ID")
+		return
+	}
+
+	user := model.User{}
+	user.Team.ID = id
+
+	users, err := model.GetUsersByTeamID(&user)
+
+	if err != nil {
+		switch err {
+		case sql.ErrNoRows:
+			respondWithError(w, http.StatusNotFound, "Team ID not found")
+		default:
+			respondWithError(w, http.StatusInternalServerError, err.Error())
+		}
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, users)
+}
+
 //UpdateUser (PUT)
 func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)

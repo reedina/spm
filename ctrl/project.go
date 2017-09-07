@@ -104,6 +104,57 @@ func GetProjectByName(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, project)
 }
 
+//GetProjectsByTeamName (GET)
+func GetProjectsByTeamName(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	projectTeamName := vars["name"]
+
+	project := model.Project{}
+	project.Team.Name = projectTeamName
+
+	projects, err := model.GetProjectsByTeamName(&project)
+
+	if err != nil {
+		switch err {
+		case sql.ErrNoRows:
+			respondWithError(w, http.StatusNotFound, "Team Name not found")
+		default:
+			respondWithError(w, http.StatusInternalServerError, err.Error())
+		}
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, projects)
+}
+
+//GetProjectsByTeamID (GET)
+func GetProjectsByTeamID(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "Invalid Project ID")
+		return
+	}
+
+	project := model.Project{}
+	project.Team.ID = id
+
+	projects, err := model.GetProjectsByTeamID(&project)
+
+	if err != nil {
+		switch err {
+		case sql.ErrNoRows:
+			respondWithError(w, http.StatusNotFound, "Team ID not found")
+		default:
+			respondWithError(w, http.StatusInternalServerError, err.Error())
+		}
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, projects)
+}
+
 //UpdateProject (PUT)
 func UpdateProject(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)

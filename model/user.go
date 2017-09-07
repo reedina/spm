@@ -113,6 +113,58 @@ func GetUserByEmail(user *User) error {
 		user.Email).Scan(&user.ID, &user.FirstName, &user.LastName, &user.Team.ID, &user.Team.Name)
 }
 
+//GetUsersByTeamName (GET)
+func GetUsersByTeamName(user *User) ([]User, error) {
+	rows, err := db.Query("SELECT spm_users.id, spm_users.first_name, spm_users.last_name, spm_users.email,"+
+		"spm_teams.id, spm_teams.name FROM spm_users "+
+		"inner join spm_teams on spm_teams.id = team_id WHERE spm_teams.name=$1",
+		user.Team.Name)
+
+	if err != nil {
+		return nil, err
+	}
+
+	users := []User{}
+
+	for rows.Next() {
+		defer rows.Close()
+
+		var u User
+		if err := rows.Scan(&u.ID, &u.FirstName, &u.LastName, &u.Email, &u.Team.ID, &u.Team.Name); err != nil {
+			return nil, err
+		}
+		users = append(users, u)
+	}
+
+	return users, nil
+}
+
+//GetUsersByTeamID (GET)
+func GetUsersByTeamID(user *User) ([]User, error) {
+	rows, err := db.Query("SELECT spm_users.id, spm_users.first_name, spm_users.last_name,"+
+		"spm_users.email, spm_teams.id, spm_teams.name FROM spm_users "+
+		"inner join spm_teams on spm_teams.id = team_id WHERE spm_teams.id=$1",
+		user.Team.ID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	users := []User{}
+
+	for rows.Next() {
+		defer rows.Close()
+
+		var u User
+		if err := rows.Scan(&u.ID, &u.FirstName, &u.LastName, &u.Email, &u.Team.ID, &u.Team.Name); err != nil {
+			return nil, err
+		}
+		users = append(users, u)
+	}
+
+	return users, nil
+}
+
 //UpdateUser (PUT)
 func UpdateUser(user *User) error {
 	_, err :=
