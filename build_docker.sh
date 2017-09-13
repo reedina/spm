@@ -1,1 +1,1 @@
-docker build -t spm . 
+docker build -t mikerap/spm . 
