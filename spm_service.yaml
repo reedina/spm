@@ -1,0 +1,12 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: spm-api 
+spec:
+  type: LoadBalancer
+  selector:
+    app: spm-api 
+  ports:
+  - protocol: TCP
+    port: 4040 
+    targetPort: 4040 

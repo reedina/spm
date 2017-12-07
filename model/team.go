@@ -1,6 +1,8 @@
 package model
 
-import "database/sql"
+import (
+	"database/sql"
+)
 
 //Team  (TYPE)
 type Team struct {
@@ -16,7 +18,7 @@ type Teams struct {
 //DoesTeamResourceExist (POST)
 func DoesTeamResourceExist(team *Team) bool {
 
-	err := db.QueryRow("SELECT id, name FROM spm_teams WHERE name=$1", team.Name).Scan(&team.ID, &team.Name)
+	err := db.QueryRow("SELECT id, name FROM spm_teams WHERE name=?", team.Name).Scan(&team.ID, &team.Name)
 
 	if err == sql.ErrNoRows {
 		return false
@@ -29,7 +31,7 @@ func DoesTeamResourceExist(team *Team) bool {
 func DoesTeamIDExist(ID int) bool {
 
 	var id int
-	err := db.QueryRow("SELECT id FROM spm_teams WHERE id=$1", ID).Scan(&id)
+	err := db.QueryRow("SELECT id FROM spm_teams WHERE id=?", ID).Scan(&id)
 
 	if err == sql.ErrNoRows {
 		return false
@@ -42,7 +44,7 @@ func DoesTeamIDExist(ID int) bool {
 func DoesTeamNameExistForAnotherID(name string, id int) bool {
 
 	var dbID int
-	err := db.QueryRow("SELECT id FROM spm_teams WHERE name=$1", name).Scan(&dbID)
+	err := db.QueryRow("SELECT id FROM spm_teams WHERE name=?", name).Scan(&dbID)
 
 	if err == sql.ErrNoRows {
 		return false
@@ -57,12 +59,18 @@ func DoesTeamNameExistForAnotherID(name string, id int) bool {
 
 //CreateTeam (POST)
 func CreateTeam(team *Team) error {
+	/*
+		err := db.QueryRow("INSERT INTO spm_teams(name) VALUES($1) RETURNING id", team.Name).Scan(&team.ID)
+	*/
 
-	err := db.QueryRow("INSERT INTO spm_teams(name) VALUES($1) RETURNING id", team.Name).Scan(&team.ID)
+	res, err := db.Exec("INSERT INTO spm_teams(name) VALUES(?)", team.Name)
 
 	if err != nil {
 		return err
 	}
+
+	id, err := res.LastInsertId()
+	team.ID = int(id)
 
 	return nil
 }
@@ -92,26 +100,26 @@ func GetTeams() ([]Team, error) {
 
 //GetTeam (GET)
 func GetTeam(team *Team) error {
-	return db.QueryRow("SELECT name FROM spm_teams WHERE id=$1", team.ID).Scan(&team.Name)
+	return db.QueryRow("SELECT name FROM spm_teams WHERE id=?", team.ID).Scan(&team.Name)
 }
 
 //GetTeamByName (GET)
 func GetTeamByName(team *Team) error {
-	return db.QueryRow("SELECT id, name from spm_teams where name=$1",
+	return db.QueryRow("SELECT id, name from spm_teams where name=?",
 		team.Name).Scan(&team.ID, &team.Name)
 }
 
 //UpdateTeam (PUT)
 func UpdateTeam(team *Team) error {
 	_, err :=
-		db.Exec("UPDATE spm_teams SET name=$1 WHERE id=$2", team.Name, team.ID)
+		db.Exec("UPDATE spm_teams SET name=? WHERE id=?", team.Name, team.ID)
 
 	return err
 }
 
 //DeleteTeam (DELETE)
 func DeleteTeam(team *Team) error {
-	_, err := db.Exec("DELETE FROM spm_teams WHERE id=$1", team.ID)
+	_, err := db.Exec("DELETE FROM spm_teams WHERE id=?", team.ID)
 
 	return err
 }

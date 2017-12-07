@@ -1,0 +1,5 @@
+docker login  -u oauth2accesstoken -p "$(gcloud auth print-access-token)" https://gcr.io
+gcloud docker -- push gcr.io/vscape-187223/rapuanospm:v2
+
+❯ kubectl get all                                                                                                                             ⏎
+No resources found.

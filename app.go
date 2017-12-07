@@ -9,8 +9,8 @@ import (
 	"github.com/reedina/spm/model"
 	"github.com/rs/cors"
 
-	//Initialize pq driver
-	_ "github.com/lib/pq"
+	//Initialize mysql driver
+	_ "github.com/go-sql-driver/mysql"
 )
 
 //App  (TYPE)
